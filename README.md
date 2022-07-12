@@ -1,2 +1,2 @@
 # Myitian.NbtSerDes
-A Named Binary Tag Serializer/Deserializer
+一个NBT标签序列化/反序列化器

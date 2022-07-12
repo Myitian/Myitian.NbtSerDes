@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net45;net6.0</TargetFrameworks>
+    <Description>A Named Binary Tag Serializer/Deserializer</Description>
+    <Company>Myitian</Company>
+    <Copyright>Copyright © Myitian 2022</Copyright>
+    <Authors>Myitian</Authors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" Condition="'$(TargetFramework)' == 'net45'" />
+  </ItemGroup>
+</Project>
