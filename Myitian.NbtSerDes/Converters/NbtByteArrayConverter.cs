@@ -44,6 +44,10 @@ namespace Myitian.NbtSerDes
                 if (read > 0)
                 {
                     buffer = new byte[BitConv.ToInt32(buffer, 0)];
+                    if (buffer.Length == 0)
+                    {
+                        return new byte[0];
+                    }
                     read = stream.Read(buffer, 0, buffer.Length);
                     if (read > 0)
                     {
@@ -59,6 +63,10 @@ namespace Myitian.NbtSerDes
                 if (read > 0)
                 {
                     buffer = new byte[BitConv.ToInt32(buffer, 0)];
+                    if (buffer.Length == 0)
+                    {
+                        return new sbyte[0];
+                    }
                     read = stream.Read(buffer, 0, buffer.Length);
                     if (read > 0)
                     {
@@ -76,6 +84,10 @@ namespace Myitian.NbtSerDes
                 if (read > 0)
                 {
                     buffer = new byte[BitConv.ToInt32(buffer, 0)];
+                    if (buffer.Length == 0)
+                    {
+                        return new List<byte>();
+                    }
                     read = stream.Read(buffer, 0, buffer.Length);
                     if (read > 0)
                     {
@@ -91,6 +103,10 @@ namespace Myitian.NbtSerDes
                 if (read > 0)
                 {
                     buffer = new byte[BitConv.ToInt32(buffer, 0)];
+                    if (buffer.Length == 0)
+                    {
+                        return new List<sbyte>();
+                    }
                     read = stream.Read(buffer, 0, buffer.Length);
                     if (read > 0)
                     {

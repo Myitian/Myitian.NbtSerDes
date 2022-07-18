@@ -70,6 +70,10 @@ namespace Myitian.NbtSerDes
                 {
                     len = BitConv.ToInt32(buffer, 0);
                     buffer = new byte[len << 3];
+                    if (buffer.Length == 0)
+                    {
+                        return new long[0];
+                    }
                     read = stream.Read(buffer, 0, buffer.Length);
                     if (read > 0)
                     {
@@ -97,6 +101,10 @@ namespace Myitian.NbtSerDes
                 {
                     len = BitConv.ToInt32(buffer, 0);
                     buffer = new byte[len << 3];
+                    if (buffer.Length == 0)
+                    {
+                        return new ulong[0];
+                    }
                     read = stream.Read(buffer, 0, buffer.Length);
                     if (read > 0)
                     {
@@ -124,6 +132,10 @@ namespace Myitian.NbtSerDes
                 {
                     len = BitConv.ToInt32(buffer, 0);
                     buffer = new byte[len << 3];
+                    if (buffer.Length == 0)
+                    {
+                        return new List<long>();
+                    }
                     read = stream.Read(buffer, 0, buffer.Length);
                     if (read > 0)
                     {
@@ -151,6 +163,10 @@ namespace Myitian.NbtSerDes
                 {
                     len = BitConv.ToInt32(buffer, 0);
                     buffer = new byte[len << 3];
+                    if (buffer.Length == 0)
+                    {
+                        return new List<ulong>();
+                    }
                     read = stream.Read(buffer, 0, buffer.Length);
                     if (read > 0)
                     {

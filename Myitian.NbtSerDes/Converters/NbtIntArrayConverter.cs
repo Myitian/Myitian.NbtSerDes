@@ -62,15 +62,19 @@ namespace Myitian.NbtSerDes
         {
             int read, len;
             byte[] buffer;
-            int[] ints;
             if (type == typeof(int[]) || type == typeof(Array) || type == typeof(object))
             {
+                int[] ints;
                 buffer = new byte[4];
                 read = stream.Read(buffer, 0, 4);
                 if (read > 0)
                 {
                     len = BitConv.ToInt32(buffer, 0);
                     buffer = new byte[len << 2];
+                    if (buffer.Length == 0)
+                    {
+                        return new int[0];
+                    }
                     read = stream.Read(buffer, 0, buffer.Length);
                     if (read > 0)
                     {
@@ -90,14 +94,51 @@ namespace Myitian.NbtSerDes
                     }
                 }
             }
-            else if (type == typeof(List<int>))
+            if (type == typeof(uint[]))
             {
+                uint[] ints;
                 buffer = new byte[4];
                 read = stream.Read(buffer, 0, 4);
                 if (read > 0)
                 {
                     len = BitConv.ToInt32(buffer, 0);
                     buffer = new byte[len << 2];
+                    if (buffer.Length == 0)
+                    {
+                        return new uint[0];
+                    }
+                    read = stream.Read(buffer, 0, buffer.Length);
+                    if (read > 0)
+                    {
+                        ints = new uint[len];
+                        if (BitConv.IsSameEndian(false))
+                        {
+                            Buffer.BlockCopy(buffer, 0, ints, 0, buffer.Length);
+                        }
+                        else
+                        {
+                            for (int i = 0; i < len; i++)
+                            {
+                                ints[i] = BitConv.ToUInt32(buffer, i << 2);
+                            }
+                        }
+                        return ints;
+                    }
+                }
+            }
+            else if (type == typeof(List<int>))
+            {
+                int[] ints;
+                buffer = new byte[4];
+                read = stream.Read(buffer, 0, 4);
+                if (read > 0)
+                {
+                    len = BitConv.ToInt32(buffer, 0);
+                    buffer = new byte[len << 2];
+                    if (buffer.Length == 0)
+                    {
+                        return new List<int>();
+                    }
                     read = stream.Read(buffer, 0, buffer.Length);
                     if (read > 0)
                     {
@@ -111,6 +152,38 @@ namespace Myitian.NbtSerDes
                             for (int i = 0; i < len; i++)
                             {
                                 ints[i] = BitConv.ToInt32(buffer, i << 2);
+                            }
+                        }
+                        return ints.ToList();
+                    }
+                }
+            }
+            else if (type == typeof(List<uint>))
+            {
+                uint[] ints;
+                buffer = new byte[4];
+                read = stream.Read(buffer, 0, 4);
+                if (read > 0)
+                {
+                    len = BitConv.ToInt32(buffer, 0);
+                    buffer = new byte[len << 2];
+                    if (buffer.Length == 0)
+                    {
+                        return new List<uint>();
+                    }
+                    read = stream.Read(buffer, 0, buffer.Length);
+                    if (read > 0)
+                    {
+                        ints = new uint[len];
+                        if (BitConv.IsSameEndian(false))
+                        {
+                            Buffer.BlockCopy(buffer, 0, ints, 0, buffer.Length);
+                        }
+                        else
+                        {
+                            for (int i = 0; i < len; i++)
+                            {
+                                ints[i] = BitConv.ToUInt32(buffer, i << 2);
                             }
                         }
                         return ints.ToList();

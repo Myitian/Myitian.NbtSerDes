@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 
 namespace Myitian.NbtSerDes
 {
@@ -32,7 +33,9 @@ namespace Myitian.NbtSerDes
 
         public readonly HashSet<Type>[] CompatibleTypes =
         {
-            null,
+            new HashSet<Type>()
+            {
+            },
             new HashSet<Type>()
             {
                 typeof(bool),
@@ -470,12 +473,7 @@ namespace Myitian.NbtSerDes
             }
             throw new ArgumentException($"Unsupported tag: {tag}");
         }
-        public T DeserializeObject<T>(Stream nbt)
-        {
-            DeserializeObject(ref nbt, typeof(T), out dynamic payload);
-            return (T)payload;
-        }
-        public void SerializeObject(ref Stream stream, string name, dynamic value, NbtConverterBase converter = null)
+        public void SerializeRawObject(ref Stream stream, string name, dynamic value, NbtConverterBase converter = null)
         {
             if (value is null)
             {
@@ -496,7 +494,7 @@ namespace Myitian.NbtSerDes
                 SerializeObjectPayload(ref stream, value, converter);
             }
         }
-        public string DeserializeObject(ref Stream stream, Type tagretType, out dynamic payload, NbtConverterBase converter = null)
+        public string DeserializeRawObject(ref Stream stream, Type tagretType, out dynamic payload, NbtConverterBase converter = null)
         {
             int read = stream.ReadByte();
             if (read >= 0)
@@ -538,23 +536,62 @@ namespace Myitian.NbtSerDes
             }
         }
 
-        public static NbtConverter DefaultConverter { get; set; } = new NbtConverter();
-        public static byte[] SerializeObject(dynamic value, string name = "")
+        public static NbtConverter DefaultConverter = new NbtConverter();
+        public static byte[] SerializeObject(dynamic value, string name = "", NbtCompressionType compressionType = NbtCompressionType.None)
         {
             Stream ms = new MemoryStream();
-            DefaultConverter.SerializeObject(ref ms, name, value);
+            DefaultConverter.SerializeRawObject(ref ms, name, value);
             ms.Position = 0;
-            byte[] bytes = Util.CopyStream(ms);
-            ms.Close();
-            return bytes;
+            switch (compressionType)
+            {
+                case NbtCompressionType.None:
+                    byte[] rawbytes = Util.CopyStream(ms);
+                    ms.Close();
+                    return rawbytes;
+                case NbtCompressionType.Gzip:
+                    using (MemoryStream gzoutput = new MemoryStream())
+                    {
+                        using (GZipStream gz = new GZipStream(gzoutput, CompressionMode.Compress, true))
+                        {
+                            ms.CopyTo(gz);
+                        }
+                        ms.Close();
+                        return gzoutput.ToArray();
+                    }
+                default:
+                    ms.Close();
+                    return null;
+            }
         }
         public static T DeserializeObject<T>(byte[] nbt)
         {
             Stream ms = new MemoryStream(nbt);
-            DefaultConverter.DeserializeObject(ref ms, typeof(T), out dynamic payload);
+            if (nbt.Length > 2 && nbt[0] == 0x1f && nbt[1] == 0x8b)
+            {
+                using (GZipStream gz = new GZipStream(ms, CompressionMode.Decompress))
+                {
+                    ms = new MemoryStream();
+                    gz.CopyTo(ms);
+                }
+            }
+            ms.Position = 0;
+            DefaultConverter.DeserializeRawObject(ref ms, typeof(T), out dynamic payload);
             T result = (T)payload;
             ms.Close();
             return result;
+        }
+        public T DeserializeObject<T>(Stream nbt)
+        {
+            if (nbt.CanSeek && nbt.ReadByte() == 0x1f && nbt.ReadByte() == 0x8b)
+            {
+                using (GZipStream gz = new GZipStream(nbt, CompressionMode.Decompress))
+                {
+                    nbt = new MemoryStream();
+                    gz.CopyTo(nbt);
+                }
+            }
+            DeserializeRawObject(ref nbt, typeof(T), out dynamic payload);
+            return (T)payload;
         }
         public static bool HasImplementedRawGeneric(Type m, object filterCriteria) => (m.IsGenericType ? m.GetGenericTypeDefinition() : m) == filterCriteria as Type;
     }

@@ -64,8 +64,8 @@ namespace Myitian.NbtSerDes
                 Type[] types;
                 if (type.GetGenericTypeDefinition() == typeof(KeyValuePair<,>) && value.Key is string && value.Value != null)
                 {
-                    converter.SerializeObject(ref stream, value.Key, value.Value);
-                    converter.SerializeObject(ref stream, null, null);
+                    converter.SerializeRawObject(ref stream, value.Key, value.Value);
+                    converter.SerializeRawObject(ref stream, null, null);
                     return;
                 }
                 else if ((types = type.FindInterfaces(NbtConverter.HasImplementedRawGeneric, typeof(IDictionary<,>))).Length > 0)
@@ -78,10 +78,10 @@ namespace Myitian.NbtSerDes
                         {
                             if (kvp.Value != null)
                             {
-                                converter.SerializeObject(ref stream, kvp.Key, kvp.Value);
+                                converter.SerializeRawObject(ref stream, kvp.Key, kvp.Value);
                             }
                         }
-                        converter.SerializeObject(ref stream, null, null);
+                        converter.SerializeRawObject(ref stream, null, null);
                         return;
                     }
                 }
@@ -96,10 +96,10 @@ namespace Myitian.NbtSerDes
                         }
                         if (kvp.Value != null)
                         {
-                            converter.SerializeObject(ref stream, kvp.Key.ToString(), kvp.Value);
+                            converter.SerializeRawObject(ref stream, kvp.Key.ToString(), kvp.Value);
                         }
                     }
-                    converter.SerializeObject(ref stream, null, null);
+                    converter.SerializeRawObject(ref stream, null, null);
                     return;
                 }
             }
@@ -168,10 +168,10 @@ namespace Myitian.NbtSerDes
                 {
                     if (!(member.Value is null))
                     {
-                        converter.SerializeObject(ref stream, member.Name, member.Value, member.Converter);
+                        converter.SerializeRawObject(ref stream, member.Name, member.Value, member.Converter);
                     }
                 }
-                converter.SerializeObject(ref stream, null, null);
+                converter.SerializeRawObject(ref stream, null, null);
                 return;
             }
             throw new ArgumentException($"Unsupported Type: {type}");
@@ -180,12 +180,13 @@ namespace Myitian.NbtSerDes
         {
             if (type == typeof(object))
             {
-                dynamic dict = Activator.CreateInstance(typeof(Dictionary<,>).MakeGenericType(typeof(string), typeof(object)));
-                string name = converter.DeserializeObject(ref stream, typeof(object), out dynamic payload);
+                Dictionary<string, dynamic> dict = new Dictionary<string, dynamic>();
+                    //dynamic dict = Activator.CreateInstance(typeof(Dictionary<,>).MakeGenericType(typeof(string), typeof(object)));
+                string name = converter.DeserializeRawObject(ref stream, typeof(object), out dynamic payload);
                 while (name != null && payload != null)
                 {
                     dict.Add(name, payload);
-                    name = converter.DeserializeObject(ref stream, typeof(object), out payload);
+                    name = converter.DeserializeRawObject(ref stream, typeof(object), out payload);
                 }
                 return dict;
             }
@@ -197,10 +198,10 @@ namespace Myitian.NbtSerDes
                     types = type.GetGenericArguments();
                     if (types[0] == typeof(string))
                     {
-                        string name = converter.DeserializeObject(ref stream, types[1], out dynamic payload);
+                        string name = converter.DeserializeRawObject(ref stream, types[1], out dynamic payload);
                         return Activator.CreateInstance(type, name, payload);
                     }
-                    converter.DeserializeObject(ref stream, null, out _);
+                    converter.DeserializeRawObject(ref stream, null, out _);
                 }
                 else if (type.GetGenericTypeDefinition() == typeof(Dictionary<,>))
                 {
@@ -208,11 +209,11 @@ namespace Myitian.NbtSerDes
                     if (types[0] == typeof(string))
                     {
                         dynamic dict = Activator.CreateInstance(typeof(Dictionary<,>).MakeGenericType(types));
-                        string name = converter.DeserializeObject(ref stream, types[1], out dynamic payload);
+                        string name = converter.DeserializeRawObject(ref stream, types[1], out dynamic payload);
                         while (name != null && payload != null)
                         {
                             dict.Add(name, payload);
-                            name = converter.DeserializeObject(ref stream, types[1], out payload);
+                            name = converter.DeserializeRawObject(ref stream, types[1], out payload);
                         }
                         return dict;
                     }

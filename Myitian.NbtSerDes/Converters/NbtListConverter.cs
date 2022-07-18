@@ -116,7 +116,7 @@ namespace Myitian.NbtSerDes
                 {
                     byte tag = (byte)read;
                     Type itype = type.GetElementType();
-                    if (converter.CompatibleTypes[tag].Contains(type.GetElementType()))
+                    if (converter.CompatibleTypes[tag].Contains(itype) || tag == 0 || tag == 9 || tag == 10) //TODO：0，9，10之类判断之后再完善
                     {
                         byte[] buffer = new byte[4];
                         read = stream.Read(buffer, 0, 4);
