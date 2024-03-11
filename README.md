@@ -1,4 +1,6 @@
-# Myitian.NbtSerDes
+# \[Deprecatd\] Myitian.NbtSerDes
+Deprecated because I'm writing an NBT serialization/deserialization library that supports SNBT and Bedrock Edition NBT formats, and also supports AOT.
+
 一个NBT标签序列化/反序列化器
 
 兼容以下任一运行时
