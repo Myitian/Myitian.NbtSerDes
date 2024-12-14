@@ -1,5 +1,5 @@
 # \[Deprecated\] Myitian.NbtSerDes
-Deprecated because I'm writing an NBT serialization/deserialization library that supports SNBT and Bedrock Edition NBT formats, and also supports AOT.
+Deprecated. Please use https://github.com/Myitian/ElysiaNBT (requires .NET 9.0) now.
 
 一个NBT标签序列化/反序列化器
 
